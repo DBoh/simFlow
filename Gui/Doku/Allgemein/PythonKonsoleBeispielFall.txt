@@ -1,0 +1,131 @@
+>>> Diese Textdatei ist der Konsolenoutput von FreeCAD während dem Ausführen des Beispielfalls
+
+>>> import CfdAnalysis
+>>> import CfdTools
+>>> analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+>>> CfdTools.setActiveAnalysis(analysis)
+>>> import CfdPhysicsSelection
+>>> analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+>>> import CfdFluidMaterial
+>>> analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+>>> import CfdInitialiseFlowField
+>>> analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+>>> import CfdSolverFoam
+>>> analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+>>> ### End command Cfd_Analysis
+>>> Gui.runCommand('Std_DlgPreferences',0)
+>>> # Gui.Selection.addSelection('Unnamed','CfdAnalysis')
+>>> # Gui.Selection.clearSelection()
+>>> # Gui.Selection.addSelection('Unnamed','Fusion')
+>>> # Gui.Selection.clearSelection()
+>>> # Gui.Selection.addSelection('Unnamed','CfdAnalysis')
+>>> # Gui.Selection.clearSelection()
+>>> # Gui.Selection.addSelection('Unnamed','Fusion','Face2',26.8228,0,57.5137)
+>>> ### Begin command Cfd_MeshFromShape
+>>> 
+>>> import CfdMesh
+>>> CfdMesh.makeCfdMesh('Fusion_Mesh')
+>>> App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Fusion
+>>> CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+>>> ### End command Cfd_MeshFromShape
+>>> # Gui.Selection.clearSelection()
+>>> import CfdMeshTools
+>>> cart_mesh = CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument.Fusion_Mesh)
+>>> FreeCAD.ActiveDocument.Fusion_Mesh.Proxy.cart_mesh = cart_mesh
+>>> cart_mesh.writeMesh()
+>>> import CfdConsoleProcess
+>>> cart_mesh = CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument.Fusion_Mesh)
+>>> proxy = FreeCAD.ActiveDocument.Fusion_Mesh.Proxy
+>>> proxy.cart_mesh = cart_mesh
+>>> cart_mesh.error = False
+>>> cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
+>>> FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\n')
+>>> env_vars = CfdTools.getRunEnvironment()
+>>> proxy.running_from_macro = True
+>>> if proxy.running_from_macro:
+>>>   mesh_process = CfdConsoleProcess.CfdConsoleProcess()
+>>>   mesh_process.start(cmd, env_vars=env_vars)
+>>>   mesh_process.waitForFinished()
+>>> else:
+>>>   proxy.mesh_process.start(cmd, env_vars=env_vars)
+>>> # Gui.Selection.addSelection('Unnamed','CfdAnalysis')
+>>> # Gui.Selection.clearSelection()
+>>> # Gui.Selection.addSelection('Unnamed','Fusion')
+>>> # Gui.Selection.clearSelection()
+>>> # Gui.Selection.addSelection('Unnamed','CfdAnalysis')
+>>> # Gui.Selection.clearSelection()
+>>> # Gui.Selection.addSelection('Unnamed','PhysicsModel')
+>>> # Gui.Selection.clearSelection()
+>>> # Gui.Selection.addSelection('Unnamed','CfdAnalysis')
+>>> App.getDocument('Unnamed').getObject('CfdAnalysis').ViewObject.doubleClicked()
+>>> FreeCAD.ActiveDocument.Fusion_Mesh.CharacteristicLengthMax = '14.0 mm'
+>>> Gui.runCommand('Cfd_PhysicsModel',0)
+>>> # Gui.Selection.clearSelection()
+>>> 
+>>> obj = FreeCAD.ActiveDocument.PhysicsModel
+>>> obj.Time = 'Steady'
+>>> obj.Phase = 'Single'
+>>> obj.Flow = 'Incompressible'
+>>> obj.Thermal = 'None'
+>>> obj.Turbulence = 'Laminar'
+>>> obj.gx = '0 mm/s^2'
+>>> obj.gy = '-9,8e+03 mm/s^2'
+>>> obj.gz = '0 mm/s^2'
+>>> ### Begin command Cfd_FluidMaterial
+>>> 
+>>> ### End command Cfd_FluidMaterial
+>>> 
+>>> FreeCAD.ActiveDocument.FluidProperties.Material = {'CardName': 'AirIsothermal', 'AuthorAndLicense': 'Air', 'Name': 'Air', 'Type': 'Isothermal', 'Description': 'Standard air properties at 20 Degrees Celsius and 1 atm', 'Density': '1.20 kg/m^3', 'DynamicViscosity': '1.80e-5 kg/m/s'}
+>>> Gui.runCommand('Cfd_InitialiseInternal',0)
+>>> 
+>>> init = FreeCAD.ActiveDocument.InitialiseFields
+>>> init.PotentialFlow = False
+>>> init.UseInletUValues = False
+>>> init.Ux = '100.0 mm/s'
+>>> init.Uy = '0.0 mm/s'
+>>> init.Uz = '0.0 mm/s'
+>>> init.UseOutletPValue = False
+>>> init.PotentialFlowP = False
+>>> init.Pressure = '100.0 kg/(mm*s^2)'
+>>> init.VolumeFractions = {}
+>>> init.UseInletTemperatureValue = False
+>>> init.Temperature = '290.0 K'
+>>> init.UseInletTurbulenceValues = False
+>>> init.nuTilda = '55000000.0 mm^2/s'
+>>> init.epsilon = '50000000.0 mm^2/s^3'
+>>> init.omega = '57.0 deg/s'
+>>> init.k = '10000.0 mm^2/s^2'
+>>> init.gammaInt = '0.0'
+>>> init.ReThetat = '0.0'
+>>> init.BoundaryU = None
+>>> init.BoundaryP = None
+>>> init.BoundaryT = None
+>>> init.BoundaryTurb = None
+>>> Gui.runCommand('Cfd_SolverControl',0)
+>>> import CfdCaseWriterFoam
+>>> FreeCAD.ActiveDocument.CfdSolver.Proxy.case_writer = CfdCaseWriterFoam.CfdCaseWriterFoam(FreeCAD.ActiveDocument.CfdAnalysis)
+>>> writer = FreeCAD.ActiveDocument.CfdSolver.Proxy.case_writer
+>>> writer.writeCase()
+>>> analysis_object = FreeCAD.ActiveDocument.CfdAnalysis
+>>> solver_object = FreeCAD.ActiveDocument.CfdSolver
+>>> working_dir = CfdTools.getOutputPath(analysis_object)
+>>> case_name = solver_object.InputCaseName
+>>> solver_directory = os.path.abspath(os.path.join(working_dir, case_name))
+>>> proxy = FreeCAD.ActiveDocument.CfdSolver.Proxy
+>>> proxy.running_from_macro = True
+>>> if proxy.running_from_macro:
+>>>   import CfdRunnableFoam
+>>>   solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)
+>>> else:
+>>>   solver_runner = proxy.solver_runner
+>>> cmd = solver_runner.get_solver_cmd(solver_directory)
+>>> FreeCAD.Console.PrintMessage(' '.join(cmd)+'\n')
+>>> env_vars = solver_runner.getRunEnvironment()
+>>> if proxy.running_from_macro:
+>>>   solver_process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=solver_runner.process_output)
+>>>   solver_process.start(cmd, env_vars=env_vars)
+>>>   solver_process.waitForFinished()
+>>> else:
+>>>   proxy.solver_process.start(cmd, env_vars=env_vars)
+>>> Gui.runCommand('Std_DlgPreferences',0)
+>>> 
